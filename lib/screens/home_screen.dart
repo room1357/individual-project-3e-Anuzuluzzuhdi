@@ -5,6 +5,7 @@ import '../screens/add_wishlist_screen.dart';
 import 'category_screen.dart';
 import 'login_screen.dart';
 import 'wishlist_screen.dart';
+import 'statistic_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -53,6 +54,13 @@ class _HomeScreenState extends State<HomeScreen> {
     MaterialPageRoute(builder: (context) => const WishlistListPage()),
   );
   _loadWishlist();
+  }
+
+  void _goToStatisticScreen() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const StatisticScreen()),
+    );
   }
 
   @override
@@ -145,7 +153,7 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           // Card 1: My Wishlist
           GestureDetector(
-            onTap: _goToWishlistListPage, // TODO: Ganti dengan page wishlist list
+            onTap: _goToWishlistListPage,
             child: Container(
               margin: const EdgeInsets.only(bottom: 20),
               padding: const EdgeInsets.all(20),
@@ -241,45 +249,56 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
-          // Placeholder for future cards
-          Container(
-            margin: const EdgeInsets.only(bottom: 20),
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.grey.shade200,
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: Colors.grey.shade300),
-            ),
-            child: Row(
-              children: [
-                Icon(Icons.bar_chart, color: Colors.grey, size: 40),
-                const SizedBox(width: 18),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
-                      Text(
-                        'Statistics (Coming Soon)',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.grey,
-                        ),
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        'Overview of your wishlist and expenses',
-                        style: TextStyle(
-                          color: Colors.grey,
-                          fontSize: 15,
-                        ),
-                      ),
-                    ],
+          // Card 3: Statistics
+          GestureDetector(
+            onTap: _goToStatisticScreen,
+            child: Container(
+              margin: const EdgeInsets.only(bottom: 20),
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.deepPurple.shade100,
+                borderRadius: BorderRadius.circular(18),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.deepPurple.withOpacity(0.12),
+                    blurRadius: 8,
+                    offset: Offset(0, 4),
                   ),
-                ),
-              ],
+                ],
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.bar_chart, color: Colors.deepPurple, size: 40),
+                  const SizedBox(width: 18),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: const [
+                        Text(
+                          'Statistics',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.deepPurple,
+                          ),
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          'Overview of your wishlist and expenses',
+                          style: TextStyle(
+                            color: Colors.deepPurple,
+                            fontSize: 15,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Icon(Icons.arrow_forward_ios, color: Colors.deepPurple),
+                ],
+              ),
             ),
           ),
+          // Placeholder for future cards
           Container(
             margin: const EdgeInsets.only(bottom: 20),
             padding: const EdgeInsets.all(20),
