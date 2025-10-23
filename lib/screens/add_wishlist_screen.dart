@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../services/db_service.dart';
 
 class AddWishlistPage extends StatefulWidget {
@@ -13,8 +14,10 @@ class _AddWishlistPageState extends State<AddWishlistPage> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descController = TextEditingController();
   final TextEditingController _priceController = TextEditingController();
-  String? _selectedCategory;
-  List<String> _categories = [];
+  dynamic _selectedCategory; 
+  List<dynamic> _categories = []; 
+  final NumberFormat _currencyFormat =
+      NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
 
   @override
   void initState() {
@@ -35,7 +38,7 @@ class _AddWishlistPageState extends State<AddWishlistPage> {
         'name': _titleController.text,
         'desc': _descController.text,
         'category': _selectedCategory ?? '',
-        'price': _priceController.text,
+        'price': int.tryParse(_priceController.text) ?? 0,
         'achieved': false,
         'achievedDate': '',
       };
@@ -83,12 +86,12 @@ class _AddWishlistPageState extends State<AddWishlistPage> {
               const SizedBox(height: 16),
 
               // Category
-              DropdownButtonFormField<String>(
+             DropdownButtonFormField<dynamic>(
                 value: _selectedCategory,
                 items: _categories
                     .map((cat) => DropdownMenuItem(
                           value: cat,
-                          child: Text(cat),
+                          child: Text(cat), 
                         ))
                     .toList(),
                 decoration: const InputDecoration(
