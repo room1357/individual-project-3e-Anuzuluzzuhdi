@@ -1,93 +1,54 @@
-import 'dart:io';
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:image_picker/image_picker.dart';
+import '../services/db_service.dart';
 
-class AddItemScreen extends StatefulWidget {
-  final Map<String, dynamic>? existingItem; // Untuk mode edit
-
-  const AddItemScreen({super.key, this.existingItem});
+class AddWishlistPage extends StatefulWidget {
+  const AddWishlistPage({super.key});
 
   @override
-  State<AddItemScreen> createState() => _AddItemScreenState();
+  State<AddWishlistPage> createState() => _AddWishlistPageState();
 }
 
-class _AddItemScreenState extends State<AddItemScreen> {
+class _AddWishlistPageState extends State<AddWishlistPage> {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descController = TextEditingController();
-  DateTime? _targetDate;
-  File? _imageFile;
+  final TextEditingController _priceController = TextEditingController();
+  String? _selectedCategory;
+  List<String> _categories = [];
 
   @override
   void initState() {
     super.initState();
-    if (widget.existingItem != null) {
-      _nameController.text = widget.existingItem!['name'] ?? '';
-      _descController.text = widget.existingItem!['desc'] ?? '';
-      if (widget.existingItem!['targetDate'] != null && widget.existingItem!['targetDate'] != '') {
-        _targetDate = DateTime.tryParse(widget.existingItem!['targetDate']);
-      }
-      if (widget.existingItem!['imagePath'] != null && widget.existingItem!['imagePath'] != '') {
-        _imageFile = File(widget.existingItem!['imagePath']);
-      }
-    }
+    _loadCategories();
   }
 
-  Future<void> _pickDate() async {
-    final now = DateTime.now();
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: _targetDate ?? now,
-      firstDate: now,
-      lastDate: DateTime(now.year + 10),
-    );
-    if (picked != null) {
-      setState(() {
-        _targetDate = picked;
-      });
-    }
+  Future<void> _loadCategories() async {
+    final cats = await DBService.getCategories();
+    setState(() {
+      _categories = cats;
+    });
   }
 
-  Future<void> _pickImage() async {
-    final picker = ImagePicker();
-    final picked = await picker.pickImage(source: ImageSource.gallery);
-    if (picked != null) {
-      setState(() {
-        _imageFile = File(picked.path);
-      });
+  Future<void> _saveWishlist() async {
+    if (_formKey.currentState!.validate()) {
+      final item = {
+        'name': _titleController.text,
+        'desc': _descController.text,
+        'category': _selectedCategory ?? '',
+        'price': _priceController.text,
+        'achieved': false,
+        'achievedDate': '',
+      };
+      await DBService.addWishlist(item);
+      if (mounted) Navigator.pop(context, item);
     }
-  }
-
-  Future<void> _saveItem() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    final prefs = await SharedPreferences.getInstance();
-    final List<String> wishlistStr = prefs.getStringList('wishlist') ?? [];
-    List<Map<String, dynamic>> wishlist = wishlistStr.map((e) => jsonDecode(e) as Map<String, dynamic>).toList();
-
-    final newItem = {
-      'name': _nameController.text,
-      'desc': _descController.text,
-      'targetDate': _targetDate?.toIso8601String() ?? '',
-      'imagePath': _imageFile?.path ?? '',
-      'achieved': false,
-      'achievedDate': '',
-    };
-
-    wishlist.add(newItem);
-    final newWishlistStr = wishlist.map((e) => jsonEncode(e)).toList();
-    await prefs.setStringList('wishlist', newWishlistStr);
-
-    Navigator.pop(context, newItem);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add New Wishlist'),
+        title: const Text('Add Wishlist Item'),
         backgroundColor: const Color(0xFF6D5DF6),
       ),
       body: Padding(
@@ -96,20 +57,20 @@ class _AddItemScreenState extends State<AddItemScreen> {
           key: _formKey,
           child: ListView(
             children: [
-              // Nama Wishlist
+              // Title
               TextFormField(
-                controller: _nameController,
+                controller: _titleController,
                 decoration: const InputDecoration(
-                  labelText: 'Wishlist Name *',
+                  labelText: 'Title *',
                   border: OutlineInputBorder(),
                   prefixIcon: Icon(Icons.star),
                 ),
-                validator: (value) =>
-                    value == null || value.trim().isEmpty ? 'Name is required' : null,
+                validator: (v) =>
+                    v == null || v.trim().isEmpty ? 'Title is required' : null,
               ),
               const SizedBox(height: 16),
 
-              // Deskripsi
+              // Description
               TextFormField(
                 controller: _descController,
                 decoration: const InputDecoration(
@@ -121,59 +82,51 @@ class _AddItemScreenState extends State<AddItemScreen> {
               ),
               const SizedBox(height: 16),
 
-              // Date Picker
-              ListTile(
-                leading: const Icon(Icons.date_range),
-                title: Text(_targetDate == null
-                    ? 'Target Date (optional)'
-                    : 'Target: ${_targetDate!.toLocal().toString().split(' ')[0]}'),
-                trailing: IconButton(
-                  icon: const Icon(Icons.edit_calendar),
-                  onPressed: _pickDate,
+              // Category
+              DropdownButtonFormField<String>(
+                value: _selectedCategory,
+                items: _categories
+                    .map((cat) => DropdownMenuItem(
+                          value: cat,
+                          child: Text(cat),
+                        ))
+                    .toList(),
+                decoration: const InputDecoration(
+                  labelText: 'Category',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.category),
                 ),
-                onTap: _pickDate,
+                onChanged: (val) {
+                  setState(() {
+                    _selectedCategory = val;
+                  });
+                },
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 16),
 
-              // Image Picker
-              ListTile(
-                leading: const Icon(Icons.image),
-                title: Text(_imageFile == null
-                    ? 'Upload Image (optional)'
-                    : 'Image Selected'),
-                trailing: _imageFile != null
-                    ? Image.file(_imageFile!, width: 40, height: 40, fit: BoxFit.cover)
-                    : null,
-                onTap: _pickImage,
+              // Price
+              TextFormField(
+                controller: _priceController,
+                decoration: const InputDecoration(
+                  labelText: 'Price',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.attach_money),
+                ),
+                keyboardType: TextInputType.number,
               ),
               const SizedBox(height: 24),
 
-              // Tombol
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: _saveItem,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF6D5DF6),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                      ),
-                      child: const Text('Save'),
-                    ),
+              // Save Button
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _saveWishlist,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF6D5DF6),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                      ),
-                      child: const Text('Cancel'),
-                    ),
-                  ),
-                ],
+                  child: const Text('Save'),
+                ),
               ),
             ],
           ),
