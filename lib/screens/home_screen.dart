@@ -6,6 +6,7 @@ import 'category_screen.dart';
 import 'login_screen.dart';
 import 'wishlist_screen.dart';
 import 'statistic_screen.dart';
+import 'profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -60,6 +61,13 @@ class _HomeScreenState extends State<HomeScreen> {
     await Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const StatisticScreen()),
+    );
+  }
+
+  void _goToProfileScreen() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const ProfilePage()),
     );
   }
 
@@ -133,6 +141,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 _goToCategoryPage();
               },
             ),
+            ListTile(
+              leading: Icon(Icons.person, color: Color(0xFF6D5DF6)),
+              title: Text('Profile'),
+              onTap: () {
+                Navigator.pop(context);
+                _goToProfileScreen();
+              },
+            ),
             Divider(),
             ListTile(
               leading: Icon(Icons.logout, color: Color(0xFF6D5DF6)),
@@ -151,6 +167,55 @@ class _HomeScreenState extends State<HomeScreen> {
       body: ListView(
         padding: const EdgeInsets.all(24),
         children: [
+          // Card: Profile
+          GestureDetector(
+            onTap: _goToProfileScreen,
+            child: Container(
+              margin: const EdgeInsets.only(bottom: 20),
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.deepPurple.shade200,
+                borderRadius: BorderRadius.circular(18),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.deepPurple.withOpacity(0.12),
+                    blurRadius: 8,
+                    offset: Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.account_circle, color: Colors.white, size: 40),
+                  const SizedBox(width: 18),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: const [
+                        Text(
+                          'Profile',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          'View your account information',
+                          style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: 15,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Icon(Icons.arrow_forward_ios, color: Colors.white70),
+                ],
+              ),
+            ),
+          ),
           // Card 1: My Wishlist
           GestureDetector(
             onTap: _goToWishlistListPage,
