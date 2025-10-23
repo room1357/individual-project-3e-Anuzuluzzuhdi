@@ -6,14 +6,26 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Warna palet baru
+    final List<Color> cardColors = [
+      Color(0xFF6D5DF6), // Ungu
+      Color(0xFF3D8CE7), // Biru
+      Color(0xFF00C9A7), // Tosca
+      Color(0xFFFFB259), // Orange
+    ];
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Home'),
-        backgroundColor: Colors.blue,
+        backgroundColor: Color(0xFF6D5DF6),
         actions: [
           IconButton(
             onPressed: () {
-              // Handle logout
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (context) => const LoginScreen()),
+                (route) => false,
+              );
             },
             icon: Icon(Icons.logout),
           ),
@@ -25,7 +37,7 @@ class HomeScreen extends StatelessWidget {
           children: [
             DrawerHeader(
               decoration: BoxDecoration(
-                color: Colors.blue,
+                color: Color(0xFF6D5DF6),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -33,7 +45,7 @@ class HomeScreen extends StatelessWidget {
                   CircleAvatar(
                     radius: 30,
                     backgroundColor: Colors.white,
-                    child: Icon(Icons.person, size: 40, color: Colors.blue),
+                    child: Icon(Icons.person, size: 40, color: Color(0xFF6D5DF6)),
                   ),
                   SizedBox(height: 10),
                   Text(
@@ -48,29 +60,36 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
             ListTile(
-              leading: Icon(Icons.home),
+              leading: Icon(Icons.home, color: Color(0xFF6D5DF6)),
               title: Text('Home'),
               onTap: () {
                 Navigator.pop(context);
               },
             ),
             ListTile(
-              leading: Icon(Icons.person),
-              title: Text('Profile'),
+              leading: Icon(Icons.favorite, color: Color(0xFF6D5DF6)),
+              title: Text('My Wishlist'),
               onTap: () {
                 Navigator.pop(context);
               },
             ),
             ListTile(
-              leading: Icon(Icons.settings),
-              title: Text('Settings'),
+              leading: Icon(Icons.add_box, color: Color(0xFF6D5DF6)),
+              title: Text('Add Item'),
+              onTap: () {
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.emoji_events, color: Color(0xFF6D5DF6)),
+              title: Text('Achieved'),
               onTap: () {
                 Navigator.pop(context);
               },
             ),
             Divider(),
             ListTile(
-              leading: Icon(Icons.logout),
+              leading: Icon(Icons.logout, color: Color(0xFF6D5DF6)),
               title: Text('Logout'),
               onTap: () {
                 Navigator.pushAndRemoveUntil(
@@ -93,7 +112,7 @@ class HomeScreen extends StatelessWidget {
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                color: Colors.blue,
+                color: Color(0xFF6D5DF6),
               ),
             ),
             SizedBox(height: 20),
@@ -103,10 +122,10 @@ class HomeScreen extends StatelessWidget {
                 crossAxisSpacing: 16,
                 mainAxisSpacing: 16,
                 children: [
-                  _buildDashboardCard('Profile', Icons.person, Colors.green),
-                  _buildDashboardCard('Messages', Icons.message, Colors.orange),
-                  _buildDashboardCard('Settings', Icons.settings, Colors.purple),
-                  _buildDashboardCard('Help', Icons.help, Colors.red),
+                  _buildDashboardCard('My Wishlist', Icons.favorite, cardColors[0]),
+                  _buildDashboardCard('Add Item', Icons.add_box, cardColors[1]),
+                  _buildDashboardCard('Achieved', Icons.emoji_events, cardColors[2]),
+                  _buildDashboardCard('Setting', Icons.settings, cardColors[3]),
                 ],
               ),
             ),
@@ -119,22 +138,33 @@ class HomeScreen extends StatelessWidget {
   Widget _buildDashboardCard(String title, IconData icon, Color color) {
     return Card(
       elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: InkWell(
         onTap: () {
           // Handle card tap
         },
         child: Container(
           padding: EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            gradient: LinearGradient(
+              colors: [color.withOpacity(0.85), color.withOpacity(0.65)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: 48, color: color),
+              Icon(icon, size: 48, color: Colors.white),
               SizedBox(height: 12),
               Text(
                 title,
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  letterSpacing: 1,
                 ),
               ),
             ],
