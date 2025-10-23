@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/db_service.dart' as db;
+import '../services/export_service.dart'; // Tambahkan import jika ingin akses langsung
+import 'package:fluttertoast/fluttertoast.dart'; // Untuk feedback sederhana (opsional)
 //import '../widgets/wishlist_card.dart';
 import '../screens/add_wishlist_screen.dart';
 import 'category_screen.dart';
@@ -68,6 +70,46 @@ class _HomeScreenState extends State<HomeScreen> {
     await Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const ProfilePage()),
+    );
+  }
+
+  void _goToExportDialog() async {
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Export Wishlist', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+            const SizedBox(height: 16),
+            ListTile(
+              leading: const Icon(Icons.table_chart),
+              title: const Text('Export to CSV'),
+              onTap: () async {
+                Navigator.pop(ctx);
+                final path = await ExportService.exportToCSV();
+                Fluttertoast.showToast(
+                  msg: path != null ? 'CSV exported to $path' : 'Export failed',
+                  toastLength: Toast.LENGTH_LONG,
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.picture_as_pdf),
+              title: const Text('Export to PDF'),
+              onTap: () async {
+                Navigator.pop(ctx);
+                final path = await ExportService.exportToPDF();
+                Fluttertoast.showToast(
+                  msg: path != null ? 'PDF exported to $path' : 'Export failed',
+                  toastLength: Toast.LENGTH_LONG,
+                );
+              },
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -363,43 +405,47 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
-          // Placeholder for future cards
-          Container(
-            margin: const EdgeInsets.only(bottom: 20),
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.grey.shade200,
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: Colors.grey.shade300),
-            ),
-            child: Row(
-              children: [
-                Icon(Icons.file_download, color: Colors.grey, size: 40),
-                const SizedBox(width: 18),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
-                      Text(
-                        'Export Data (Coming Soon)',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.grey,
+          // Card: Export Data
+          GestureDetector(
+            onTap: _goToExportDialog,
+            child: Container(
+              margin: const EdgeInsets.only(bottom: 20),
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade200,
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: Colors.grey.shade300),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.file_download, color: Colors.grey, size: 40),
+                  const SizedBox(width: 18),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: const [
+                        Text(
+                          'Export Data',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey,
+                          ),
                         ),
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        'Export your wishlist to CSV or PDF',
-                        style: TextStyle(
-                          color: Colors.grey,
-                          fontSize: 15,
+                        SizedBox(height: 4),
+                        Text(
+                          'Export your wishlist to CSV or PDF',
+                          style: TextStyle(
+                            color: Colors.grey,
+                            fontSize: 15,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                  const Icon(Icons.arrow_forward_ios, color: Colors.grey),
+                ],
+              ),
             ),
           ),
         ],
